@@ -1,0 +1,75 @@
+---
+- name: Déploiement automatisé de l'application Java (WAR)
+  # La cible sera définie dynamiquement par Jenkins
+  hosts: "{{ target_env }}"
+  # Exécuter les commandes en tant que root (sudo)
+  become: yes 
+  
+  # Définition des variables demandées dans le TP
+  vars:
+    war_file: "app.war"        # Nom par défaut du fichier
+    backup: "true"             # Activer la sauvegarde par défaut
+    version: "1.0.0"           # Version par défaut
+    
+    # Variables internes pour faciliter la maintenance
+    tomcat_dir: "/opt/tomcat"
+    webapp_dir: "/opt/tomcat/webapps"
+    backup_dir: "/opt/tomcat/backups"
+    service_name: "tomcat"
+
+  tasks:
+    - name: 1. Créer le répertoire de sauvegarde s'il n'existe pas
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: 2. Sauvegarder l'ancienne version (Conditionnel)
+      archive:
+        # On cible l'application par défaut de Tomcat (ROOT.war)
+        path: "{{ webapp_dir }}/ROOT.war"
+        # On ajoute la variable 'version' et un horodatage au nom du backup
+        dest: "{{ backup_dir }}/ROOT_backup_v{{ version }}_{{ lookup('pipe', 'date +%Y%m%d_%H%M') }}.war.gz"
+      # On ignore l'erreur si c'est le tout premier déploiement et qu'il n'y a rien à sauvegarder
+      ignore_errors: yes
+      # Cette tâche ne s'exécute QUE si la variable 'backup' est à true
+      when: backup | bool
+
+    - name: 3. Arrêter le service Tomcat
+      systemd:
+        name: "{{ service_name }}"
+        state: stopped
+
+    - name: 4. Nettoyer l'ancienne application (Fichier et Dossier extrait)
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ webapp_dir }}/ROOT.war"
+        - "{{ webapp_dir }}/ROOT/"
+
+    - name: 5. Déployer le nouveau fichier WAR depuis Jenkins
+      copy:
+        # Le fichier source vient de l'espace de travail Jenkins
+        src: "../{{ war_file }}"
+        # Tomcat lit ROOT.war comme étant la racine du site (http://ip:8080/)
+        dest: "{{ webapp_dir }}/ROOT.war"
+        owner: tomcat
+        group: tomcat
+        mode: '0644'
+
+    - name: 6. Redémarrer le service Tomcat
+      systemd:
+        name: "{{ service_name }}"
+        state: started
+
+    - name: 7. Health Check - Vérifier le déploiement
+      uri:
+        url: http://localhost:8080/
+        status_code: 200
+        return_content: yes
+      register: health_check
+      # Tomcat met quelques secondes à démarrer, on lui dit de réessayer 5 fois toutes les 10 secondes
+      until: health_check.status == 200
+      retries: 5
+      delay: 10
