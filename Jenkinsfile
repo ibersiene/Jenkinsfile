@@ -36,10 +36,10 @@ pipeline {
                     // On recrée l'inventaire dynamiquement avec la clé SSH de l'utilisateur Jenkins
                     def inventoryContent = """
 [cible1]
-${IP_CIBLE1} ansible_user=deploy ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/id_rsa
+${IP_CIBLE1} 
 
 [vmtomcat]
-${IP_TOMCAT} ansible_user=tomcat ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/id_rsa
+${IP_TOMCAT} 
 
 [all:children]
 cible1
