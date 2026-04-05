@@ -21,8 +21,8 @@ pipeline {
     environment {
         // Désactive la vérification SSH pour éviter l'erreur "Host key verification failed"
         ANSIBLE_HOST_KEY_CHECKING = "False"
-        IP_CIBLE1 = "192.168.17.129"
-        IP_TOMCAT = "192.168.17.130"
+        IP_CIBLE1 = "192.168.10.40"
+        IP_TOMCAT = "192.168.10.50"
     }
 
     stages {
