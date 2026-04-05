@@ -8,7 +8,7 @@ pipeline {
 
     parameters {
         choice(name: 'ENVIRONMENT', choices: ['cible1', 'vm_tomcat', 'all'], description: 'Cible de déploiement')
-        string(name: 'WAR_FILE', defaultValue: 'app.war', description: 'Nom du fichier WAR')
+        string(name: 'WAR_FILE', defaultValue: 'webapp.war', description: 'Nom du fichier WAR')
         booleanParam(name: 'BACKUP', defaultValue: true, description: 'Faire une sauvegarde avant ?')
     }
 
