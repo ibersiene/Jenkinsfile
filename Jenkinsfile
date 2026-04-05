@@ -43,7 +43,7 @@ ${IP_TOMCAT}
 
 [all:children]
 cible1
-vm_tomcat
+vmtomcat
 """
                     writeFile file: 'inventory.ini', text: inventoryContent
                     
