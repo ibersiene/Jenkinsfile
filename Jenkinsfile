@@ -37,9 +37,7 @@ vm_tomcat
 """
                     writeFile file: 'inventory.ini', text: inventoryContent
                     
-                    // Simulation du fichier WAR pour éviter l'erreur de copie
-                    sh "touch ${params.WAR_FILE}"
-
+               
                     // CORRECTION 2 : On écrit le vrai contenu du playbook au lieu d'un fichier vide
 
                 }
@@ -50,7 +48,7 @@ vm_tomcat
             steps {
                 echo "Déploiement en cours sur : ${params.ENVIRONMENT}"
                 ansiblePlaybook(
-                    playbook: 'deploy-war.yml',
+                    playbook: 'ansible/deploy-war.yml',
                     inventory: 'inventory.ini',
                     colorized: true,
                     extraVars: [
