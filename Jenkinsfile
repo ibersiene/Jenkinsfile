@@ -69,10 +69,6 @@ vm_tomcat
     }
 
     post {
-        always {
-            echo "Nettoyage de l'espace de travail..."
-            sh 'rm -f inventory.ini deploy-war.yml ${WAR_FILE}'
-        }
         success {
             echo "SUCCÈS : L'application a été déployée avec succès !"
         }
